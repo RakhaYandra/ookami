@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.7): Phase 6 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, and stable `--json` for automation.
+> Status (v0.8): Phase 7 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, and opt-in `--fix` for safe service restarts.
 
 ## Example
 
@@ -74,6 +74,7 @@ JSON output (`--json`) includes ordered `categories` breakdown:
 - Exit codes 0–4 for scripting
 - `--no-color` flag and `NO_COLOR` env support, plus `--verbose`
 - Remediation hints (`→ Suggested action`) under actionable findings
+- Auto-fix (`--fix`): allowlisted `systemctl start/restart` with per-item confirmation (see below)
 
 ## Requirements
 
@@ -94,7 +95,7 @@ make build        # produces ./bin/ookami
 
 | Command | Flags | Description |
 |---|---|---|
-| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (system/development/storage/services/network/gpu); `--json`/`--quiet` switch output, `--fix` prints a Phase 7 notice |
+| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (system/development/storage/services/network/gpu); `--json`/`--quiet` switch output, `--fix` attempts allowlisted fixes with confirmation and re-renders |
 | `ookami check <category>` | — | Single-category check; `system`, `development`, `storage`, `services`, `network`, `gpu` all functional |
 | `ookami version` | — | Print version (`dev` unless built with `VERSION=...`) |
 | global | `--no-color`, `--verbose` | Disable color output; verbose output (`NO_COLOR` env also disables color) |
@@ -118,9 +119,29 @@ ookami doctor --quiet; echo $?
 # ⚠ PostgreSQL → exit 1 (live host, 2026-10-09)
 ```
 
+## Auto-fix
+
+`doctor --fix` plans fixes only from warning/critical results that carry remediation data. Allowlist: `systemctl start <unit>` / `systemctl restart <unit>` with unit matching `^[a-zA-Z0-9@._:\-]+$` (2 args exactly); anything else prints `skipped: not an allowed fix: ...` and never executes. Each allowed item prompts on stdout and runs only on `y`/`yes`:
+
+```text
+Proposed fix for Docker Daemon: sudo systemctl restart docker.service
+Execute? [y/N] n
+skipped.
+```
+
+Rules: no `--yes` flag exists — every fix needs a human answer; non-TTY stdin (pipe/redirect) auto-declines without reading; non-root runs via system `sudo <same argv>` (Ookami never handles passwords), root runs directly; after the fix pass `doctor` re-runs all checks on a fresh context and renders again; `--fix` forces human output even with `--json`/`--quiet` (`info: --fix renders human output` on stderr) with a `fix: N fixed, N failed, N skipped.` summary line.
+
+Live host has no fixable item (PostgreSQL no-unit path carries nil remediation), so the prompt never appears:
+
+```sh
+echo n | ookami doctor --fix
+# info: no fixable items. (stderr)
+# Score: 99/100, 1 warning, 0 critical issues, exit 1 — rendered twice (before + after re-run)
+```
+
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.7 does (Phase 6 complete).
+Planned checks and automation are tracked internally; this README documents only what v0.8 does (Phase 7 complete).
 
 ## Contributing
 

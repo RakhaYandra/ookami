@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"errors"
+	"os"
 	"strings"
 	"testing"
 
@@ -115,9 +116,26 @@ func TestDoctorHelpText(t *testing.T) {
 	if !strings.Contains(cmd.Long, "--verbose") {
 		t.Fatalf("doctor Long missing --verbose note, got %q", cmd.Long)
 	}
+	if !strings.Contains(cmd.Long, "--fix renders human output") {
+		t.Fatalf("doctor Long missing --fix human note, got %q", cmd.Long)
+	}
 	f := cmd.Flags().Lookup("fix")
-	if f == nil || !strings.Contains(f.Usage, "Phase 7") {
-		t.Fatalf("fix flag usage missing Phase 7 notice, got %+v", f)
+	if f == nil || !strings.Contains(f.Usage, "attempt safe fixes with confirmation") {
+		t.Fatalf("fix flag usage missing confirmation note, got %+v", f)
+	}
+}
+
+func TestIsCharDevice(t *testing.T) {
+	if isCharDevice(new(bytes.Buffer)) {
+		t.Fatal("bytes.Buffer must not be char device")
+	}
+	f, err := os.Open(os.DevNull)
+	if err != nil {
+		t.Fatalf("open devnull: %v", err)
+	}
+	defer f.Close()
+	if !isCharDevice(f) {
+		t.Fatal("os.DevNull must be char device")
 	}
 }
 

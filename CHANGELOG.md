@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-09
+
+### Added
+
+- Phase 7 fix engine:
+  - New `internal/fixer`: `Plan()` allows only `systemctl start|restart <unit>` (exactly 2 args, unit regex `^[a-zA-Z0-9@._:\-]+$`) from warning/critical results with remediation data; `Confirm()` prompts `Execute? [y/N]` on stdout, TTY-gated (non-TTY auto-declines without reading), `y/yes` only; `Apply()` runs via system `sudo` when non-root (direct when root), per-item `✓ fixed` / `✗ <first error line>` / `skipped.` lines, continues past failures
+  - `doctor --fix` now executes: renders, applies fixes, prints `fix: N fixed, N failed, N skipped.` to stderr, re-runs all checks on a fresh context and renders again; `--fix` forces human output even with `--json`/`--quiet` (`info: --fix renders human output`); no `--yes` flag
+  - Live host unchanged: `echo n | ookami doctor --fix` → `info: no fixable items.`, Score 99/100, 1 warning, exit 1 (PostgreSQL no-unit path carries nil remediation, prompt never appears)
+
 ## [0.7.0] - 2026-10-09
 
 ### Added
