@@ -52,7 +52,7 @@ func NewDoctorCmd() *cobra.Command {
 			verbose, _ := cmd.Flags().GetBool("verbose")
 			forceHuman := fix && (jsonOut || quiet)
 			if forceHuman {
-				fmt.Fprintln(errW, "info: --fix renders human output")
+				_, _ = fmt.Fprintln(errW, "info: --fix renders human output")
 			}
 			render := func(results []model.Result) error {
 				switch {
@@ -81,10 +81,10 @@ func NewDoctorCmd() *cobra.Command {
 				}
 				items := fx.Plan(rs)
 				if len(items) == 0 {
-					fmt.Fprintln(errW, "info: no fixable items.")
+					_, _ = fmt.Fprintln(errW, "info: no fixable items.")
 				} else {
 					fixed, failed, skipped := fx.Apply(ctx, items)
-					fmt.Fprintf(errW, "fix: %d fixed, %d failed, %d skipped.\n", fixed, failed, skipped)
+					_, _ = fmt.Fprintf(errW, "fix: %d fixed, %d failed, %d skipped.\n", fixed, failed, skipped)
 				}
 				ctx2, cancel2 := context.WithTimeout(cmd.Context(), 60*time.Second)
 				defer cancel2()

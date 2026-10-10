@@ -82,7 +82,7 @@ func (c OSCheck) run() model.Result {
 		base.Message = "os-release unreadable"
 		return base
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	name := parseOSRelease(f)
 	base.Severity = model.SeverityPass
 	base.Message = name
@@ -197,7 +197,7 @@ func (c CPUCheck) Run(_ context.Context) []Result {
 		base.Message = "cpuinfo unreadable"
 		return model.Single(base)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	name, cores, threads := parseCPUInfo(f)
 	base.Severity = model.SeverityPass
 	base.Message = fmt.Sprintf("%s (%d cores/%d threads, %s)", name, cores, threads, readTemp(c.TempPath))
@@ -261,7 +261,7 @@ func (c MemoryCheck) Run(_ context.Context) []Result {
 		base.Message = "meminfo unreadable"
 		return model.Single(base)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	total, avail := parseMemInfo(f)
 	if total == 0 {
 		base.Severity = model.SeverityUnknown

@@ -11,7 +11,7 @@ func NewVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "print version",
 		Run: func(cmd *cobra.Command, _ []string) {
-			fmt.Fprintf(cmd.OutOrStdout(), "ookami %s\n", Version)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "ookami %s\n", Version)
 		},
 	}
 }

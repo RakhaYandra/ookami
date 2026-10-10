@@ -116,7 +116,7 @@ func (s NetworkSuite) Run(ctx context.Context) []model.Result {
 			if err != nil {
 				return 0, err
 			}
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			return resp.StatusCode, nil
 		}
 	}
@@ -222,7 +222,7 @@ func (s NetworkSuite) Run(ctx context.Context) []model.Result {
 	// 6. Docker Hub HEAD (2xx/3xx/401; registry returns 401 without auth).
 	start = time.Now()
 	code, err = head("https://registry-1.docker.io/v2/", timeout)
-	if err != nil || !((code >= 200 && code < 400) || code == 401) {
+	if err != nil || ((code < 200 || code >= 400) && code != 401) {
 		out = append(out, fail(5, model.SeverityWarning, "Docker Hub unreachable", start))
 		return out
 	}

@@ -133,7 +133,7 @@ func TestIsCharDevice(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open devnull: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	if !isCharDevice(f) {
 		t.Fatal("os.DevNull must be char device")
 	}

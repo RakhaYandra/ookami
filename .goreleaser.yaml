@@ -1,0 +1,21 @@
+version: 2
+project_name: ookami
+
+builds:
+  - id: ookami
+    main: ./cmd/ookami
+    binary: ookami
+    goos: [linux]
+    goarch: [amd64, arm64]
+    env: [CGO_ENABLED=0]
+    ldflags:
+      - -s -w -X github.com/RakhaYandra/ookami/internal/cli.Version={{.Version}}
+
+archives:
+  - id: ookami
+    ids: [ookami]
+    name_template: "ookami_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats: [tar.gz]
+
+checksum:
+  name_template: checksums.txt

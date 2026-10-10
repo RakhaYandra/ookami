@@ -78,7 +78,7 @@ func (f *Fixer) Confirm(it FixItem) bool {
 	if f.euid() != 0 {
 		prefix = "sudo "
 	}
-	fmt.Fprintf(f.out(), "Proposed fix for %s: %s%s\nExecute? [y/N] ", it.Result.Title, prefix, cmd)
+	_, _ = fmt.Fprintf(f.out(), "Proposed fix for %s: %s%s\nExecute? [y/N] ", it.Result.Title, prefix, cmd)
 	if f.Stdin == nil {
 		return false
 	}
@@ -100,12 +100,12 @@ func (f *Fixer) Confirm(it FixItem) bool {
 func (f *Fixer) Apply(ctx context.Context, items []FixItem) (fixed, failed, skipped int) {
 	for _, it := range items {
 		if !it.Allowed {
-			fmt.Fprintln(f.out(), "skipped: "+it.SkipReason)
+			_, _ = fmt.Fprintln(f.out(), "skipped: "+it.SkipReason)
 			skipped++
 			continue
 		}
 		if !f.Confirm(it) {
-			fmt.Fprintln(f.out(), "skipped.")
+			_, _ = fmt.Fprintln(f.out(), "skipped.")
 			skipped++
 			continue
 		}
@@ -124,11 +124,11 @@ func (f *Fixer) Apply(ctx context.Context, items []FixItem) (fixed, failed, skip
 		}
 		if err != nil {
 			first := strings.SplitN(err.Error(), "\n", 2)[0]
-			fmt.Fprintf(f.out(), "✗ %s: %s\n", it.Result.Title, first)
+			_, _ = fmt.Fprintf(f.out(), "✗ %s: %s\n", it.Result.Title, first)
 			failed++
 			continue
 		}
-		fmt.Fprintf(f.out(), "✓ %s fixed\n", it.Result.Title)
+		_, _ = fmt.Fprintf(f.out(), "✓ %s fixed\n", it.Result.Title)
 		fixed++
 	}
 	return fixed, failed, skipped
