@@ -158,3 +158,113 @@ func TestRenderHumanGrouped(t *testing.T) {
 		}
 	}
 }
+
+func TestRenderHumanSuggestedAction(t *testing.T) {
+	var buf bytes.Buffer
+	rs := []model.Result{
+		{
+			Category: model.CategoryServices, Severity: model.SeverityWarning,
+			Title: "Docker", Message: "down",
+			Remediation: &model.Remediation{
+				Description: "Start Docker daemon", Command: "systemctl",
+				Args:         []string{"start", "docker"},
+				RequiresSudo: true,
+			},
+		},
+		{
+			Category: model.CategoryDevelopment, Severity: model.SeverityCritical,
+			Title: "Go", Message: "missing",
+			Remediation: &model.Remediation{
+				Description: "Install Go", Command: "apt",
+				Args: []string{"install", "golang"},
+			},
+		},
+	}
+	if err := RenderHuman(&buf, rs, 50, "critical"); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	wantSudo := "    → Suggested action: systemctl start docker (Start Docker daemon, requires sudo)"
+	if !strings.Contains(out, wantSudo) {
+		t.Errorf("missing exact %q:\n%s", wantSudo, out)
+	}
+	wantPlain := "    → Suggested action: apt install golang (Install Go)"
+	if !strings.Contains(out, wantPlain) {
+		t.Errorf("missing exact %q:\n%s", wantPlain, out)
+	}
+}
+
+func TestRenderHumanNoSuggestedAction(t *testing.T) {
+	var buf bytes.Buffer
+	rs := []model.Result{
+		{Category: model.CategorySystem, Severity: model.SeverityPass, Title: "OS", Remediation: &model.Remediation{Description: "d", Command: "cmd"}},
+		{Category: model.CategorySystem, Severity: model.SeverityInfo, Title: "Info", Remediation: &model.Remediation{Description: "d", Command: "cmd"}},
+		{Category: model.CategorySystem, Severity: model.SeverityWarning, Title: "WarnNoRem"},
+		{Category: model.CategorySystem, Severity: model.SeverityCritical, Title: "CritNoRem"},
+	}
+	if err := RenderHuman(&buf, rs, 90, "warning"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(buf.String(), "Suggested action") {
+		t.Errorf("should not contain Suggested action:\n%s", buf.String())
+	}
+}
+
+func TestRenderHumanVerboseDetailsSorted(t *testing.T) {
+	var buf bytes.Buffer
+	rs := []model.Result{
+		{
+			Category: model.CategorySystem, Severity: model.SeverityPass,
+			Title: "Disk", Message: "ok",
+			Details: map[string]any{"b": 2, "a": 1},
+		},
+	}
+	if err := RenderHumanVerbose(&buf, rs, 100, "healthy"); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	ia := strings.Index(out, "      a=1")
+	ib := strings.Index(out, "      b=2")
+	if ia < 0 || ib < 0 || ia > ib {
+		t.Errorf("details not sorted (a before b):\n%s", out)
+	}
+	for _, want := range []string{"Score: 100/100", "OOKAMI"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing footer %q:\n%s", want, out)
+		}
+	}
+	var plain bytes.Buffer
+	if err := RenderHuman(&plain, rs, 100, "healthy"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(plain.String(), "a=1") {
+		t.Errorf("non-verbose should not contain details:\n%s", plain.String())
+	}
+}
+
+func TestNoANSI(t *testing.T) {
+	rs := []model.Result{
+		{
+			Category: model.CategoryServices, Severity: model.SeverityWarning,
+			Title: "Docker", Message: "down",
+			Details:     map[string]any{"a": 1},
+			Remediation: &model.Remediation{Description: "Start Docker daemon", Command: "systemctl", Args: []string{"start", "docker"}, RequiresSudo: true},
+		},
+		{Category: model.CategorySystem, Severity: model.SeverityPass, Title: "OS"},
+	}
+	var h, v, q bytes.Buffer
+	if err := RenderHuman(&h, rs, 80, "warning"); err != nil {
+		t.Fatal(err)
+	}
+	if err := RenderHumanVerbose(&v, rs, 80, "warning"); err != nil {
+		t.Fatal(err)
+	}
+	if err := RenderQuiet(&q, rs); err != nil {
+		t.Fatal(err)
+	}
+	for name, out := range map[string]string{"human": h.String(), "verbose": v.String(), "quiet": q.String()} {
+		if strings.Contains(out, "\x1b") {
+			t.Errorf("%s contains ANSI escape:\n%q", name, out)
+		}
+	}
+}

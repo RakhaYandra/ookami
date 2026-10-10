@@ -126,7 +126,7 @@ func TestActiveCategoriesOrderStable(t *testing.T) {
 		{ID: "sys-1", Category: model.CategorySystem, Severity: model.SeverityPass},
 	}
 	got := activeCategories(rs)
-	want := []model.Category{model.CategorySystem, model.CategoryNetwork, model.CategoryServices, model.CategoryGPU}
+	want := []model.Category{model.CategorySystem, model.CategoryNetwork, model.CategoryGPU, model.CategoryServices}
 	if len(got) != len(want) {
 		t.Fatalf("order = %v, want %v", got, want)
 	}

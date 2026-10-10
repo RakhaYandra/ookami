@@ -107,6 +107,37 @@ func TestDoctorFlagParsing(t *testing.T) {
 	}
 }
 
+func TestDoctorHelpText(t *testing.T) {
+	cmd := NewDoctorCmd()
+	if !strings.Contains(cmd.Long, "--json wins over --quiet") {
+		t.Fatalf("doctor Long missing precedence note, got %q", cmd.Long)
+	}
+	if !strings.Contains(cmd.Long, "--verbose") {
+		t.Fatalf("doctor Long missing --verbose note, got %q", cmd.Long)
+	}
+	f := cmd.Flags().Lookup("fix")
+	if f == nil || !strings.Contains(f.Usage, "Phase 7") {
+		t.Fatalf("fix flag usage missing Phase 7 notice, got %+v", f)
+	}
+}
+
+func TestVerbosePersistentInheritedViaRoot(t *testing.T) {
+	// Parses --verbose through root without running live checks (--help short-circuits RunE).
+	root := NewRootCmd()
+	root.SetOut(new(bytes.Buffer))
+	root.SetErr(new(bytes.Buffer))
+	root.SetArgs([]string{"--verbose", "doctor", "--help"})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("help execute: %v", err)
+	}
+	got, err := root.PersistentFlags().GetBool("verbose")
+	if err != nil || !got {
+		t.Fatalf("want root --verbose=true after parse, got %v err %v", got, err)
+	}
+	// Manual doc: RenderHumanVerbose selection is verified by output package tests
+	// (TestRenderHumanVerboseDetailsSorted) + manual `doctor --verbose` run, not live CI.
+}
+
 func TestExitCodeMapsToExitError(t *testing.T) {
 	rs := []model.Result{{Severity: model.SeverityWarning}}
 	if got := output.ExitCode(rs, false, false); got != 1 {

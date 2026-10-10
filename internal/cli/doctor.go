@@ -18,6 +18,7 @@ func NewDoctorCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "doctor",
 		Short: "full health check",
+		Long:  "Run full health check across all categories.\n\n--json wins over --quiet; --verbose adds per-check details to human output.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			cfg := config.Default()
 			if err := cfg.Validate(); err != nil {
@@ -32,15 +33,22 @@ func NewDoctorCmd() *cobra.Command {
 				fmt.Fprintln(cmd.ErrOrStderr(), "info: fix engine lands in Phase 7")
 			}
 			out := cmd.OutOrStdout()
+			// Flags() includes persistent parents (verified: cobra mergePersistentFlags),
+			// so --verbose from root reads here. Standalone (no parent) → err → false.
+			verbose, _ := cmd.Flags().GetBool("verbose")
 			var rerr error
 			switch {
-			case jsonOut:
+			case jsonOut: // --json wins over --quiet
 				rerr = output.RenderJSONBreakdown(out, rs)
 			case quiet:
 				rerr = output.RenderQuiet(out, rs)
 			default:
 				score, status := scoring.Score(rs)
-				rerr = output.RenderHuman(out, rs, score, status)
+				if verbose {
+					rerr = output.RenderHumanVerbose(out, rs, score, status)
+				} else {
+					rerr = output.RenderHuman(out, rs, score, status)
+				}
 			}
 			if rerr != nil {
 				return rerr
@@ -51,7 +59,7 @@ func NewDoctorCmd() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().BoolVar(&fix, "fix", false, "attempt safe fixes")
+	cmd.Flags().BoolVar(&fix, "fix", false, "attempt safe fixes (executes in Phase 7; currently prints a notice)")
 	cmd.Flags().BoolVar(&jsonOut, "json", false, "output JSON")
 	cmd.Flags().BoolVar(&quiet, "quiet", false, "suppress non-essential output")
 	return cmd

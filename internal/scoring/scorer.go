@@ -16,8 +16,8 @@ var CategoryOrder = []model.Category{
 	model.CategoryDevelopment,
 	model.CategoryStorage,
 	model.CategoryNetwork,
-	model.CategoryServices,
 	model.CategoryGPU,
+	model.CategoryServices,
 }
 
 type CategoryScore struct {

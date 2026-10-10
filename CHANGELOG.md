@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-09
+
+### Added
+
+- Phase 6 automation/output:
+  - Remediation hints: `→ Suggested action: <cmd> (<desc>[, requires sudo])` under warning/critical/unknown results with remediation data (`suggestedActionLine` in `internal/output`); live host shows none (PostgreSQL no-unit path carries nil, only a stopped unit does)
+  - `RenderHumanVerbose` (`--verbose` on `doctor` + `check`): sorted `key=value` detail lines per result; `--json` wins over `--quiet`, `doctor` Long documents the precedence, `--fix` usage notes the Phase 7 notice
+  - Single category order: `output` now aliases `scoring.CategoryOrder` (`system, development, storage, network, gpu, services`); human grouping and JSON `categories` follow the same order
+  - Live `doctor` unchanged: Score 99/100, 1 warning, exit 1; exit matrix via built binary: `check network --quiet` → 0, `doctor --quiet` → 1, `check bogus` → 4
+
 ## [0.6.0] - 2026-10-09
 
 ### Added

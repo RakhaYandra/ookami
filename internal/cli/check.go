@@ -41,15 +41,21 @@ func NewCheckCmd() *cobra.Command {
 			defer cancel()
 			rs := doctor.RunAll(ctx, checks)
 			out := cmd.OutOrStdout()
+			// Flags() includes persistent parents (see doctor.go); standalone → false.
+			verbose, _ := cmd.Flags().GetBool("verbose")
 			var rerr error
 			switch {
-			case jsonOut:
+			case jsonOut: // --json wins over --quiet
 				rerr = output.RenderJSONBreakdown(out, rs)
 			case quiet:
 				rerr = output.RenderQuiet(out, rs)
 			default:
 				score, status := scoring.Score(rs)
-				rerr = output.RenderHuman(out, rs, score, status)
+				if verbose {
+					rerr = output.RenderHumanVerbose(out, rs, score, status)
+				} else {
+					rerr = output.RenderHuman(out, rs, score, status)
+				}
 			}
 			if rerr != nil {
 				return rerr

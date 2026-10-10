@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.6): Phase 5 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring.
+> Status (v0.7): Phase 6 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, and stable `--json` for automation.
 
 ## Example
 
@@ -51,6 +51,8 @@ Development environment needs attention.
 
 (Real output, 2026-10-09, exit 1. Values are machine-specific and will differ on your host.)
 
+Remediation lines (`    → Suggested action: <command> (<description>[, requires sudo])`) print under warning/critical/unknown results that carry remediation data. This host shows none: the PostgreSQL no-unit path carries no remediation (only a stopped unit does). `--verbose` adds sorted `key=value` detail lines per result (e.g. `latency_ms`, `driver`).
+
 ## How scoring works
 
 Weighted per-category score (0–100): system 20, development 30, storage 15, network 15, services 10, gpu 10. Each category starts at 100 with penalti 25/5/2 per critical/warning/unknown result (pass/info no effect, floor 0); global score is the weight-averaged sum over active categories only (renormalisasi kategori absen). GPU eksklusi bila tak ada hardware (`gpu-none` info-only excluded; single-category `check` renormalizes to its own weight). Live example above: 5 categories at 100 + services at 95 → (90×100+95×10)/100=99, status `warning`.
@@ -71,6 +73,7 @@ JSON output (`--json`) includes ordered `categories` breakdown:
 - Category validation for `check`: `system|development|storage|network|gpu|services`
 - Exit codes 0–4 for scripting
 - `--no-color` flag and `NO_COLOR` env support, plus `--verbose`
+- Remediation hints (`→ Suggested action`) under actionable findings
 
 ## Requirements
 
@@ -106,9 +109,18 @@ make build        # produces ./bin/ookami
 | 3 | Execution error |
 | 4 | Invalid arguments or CLI usage error |
 
+## Automation
+
+`--json` schema is stable for v0.1: `{score, status, categories[], results[]}`, with `categories` ordered `system, development, storage, network, gpu, services`. Adding keys is minor; removing/renaming is breaking. `--quiet` prints only `warning|critical|unknown` titles (`⚠ <Title>`); `--verbose` adds sorted `key=value` detail lines to human output. `--json` wins over `--quiet` when both are passed.
+
+```sh
+ookami doctor --quiet; echo $?
+# ⚠ PostgreSQL → exit 1 (live host, 2026-10-09)
+```
+
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.6 does (Phase 5 complete).
+Planned checks and automation are tracked internally; this README documents only what v0.7 does (Phase 6 complete).
 
 ## Contributing
 
