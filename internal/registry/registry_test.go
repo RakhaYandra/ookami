@@ -12,8 +12,6 @@ type fakeCheck struct {
 	cat model.Category
 }
 
-func (f fakeCheck) ID() string                        { return f.id }
-func (f fakeCheck) Category() model.Category          { return f.cat }
 func (f fakeCheck) Metadata() model.CheckMetadata     { return model.CheckMetadata{ID: f.id, Category: f.cat} }
 func (f fakeCheck) Run(ctx context.Context) model.Result { return model.Result{ID: f.id} }
 
@@ -26,12 +24,12 @@ func TestRegisterOrderedByCategory(t *testing.T) {
 	if len(got) != 2 {
 		t.Fatalf("Ordered len = %d, want 2", len(got))
 	}
-	if got[0].ID() != "a" || got[1].ID() != "b" {
-		t.Fatalf("Ordered order = %v, want [a b]", []string{got[0].ID(), got[1].ID()})
+	if got[0].Metadata().ID != "a" || got[1].Metadata().ID != "b" {
+		t.Fatalf("Ordered order = %v, want [a b]", []string{got[0].Metadata().ID, got[1].Metadata().ID})
 	}
 
 	sys := ByCategory(model.CategorySystem)
-	if len(sys) != 1 || sys[0].ID() != "a" {
+	if len(sys) != 1 || sys[0].Metadata().ID != "a" {
 		t.Fatalf("ByCategory system = %v, want [a]", sys)
 	}
 

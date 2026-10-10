@@ -50,8 +50,6 @@ type CheckMetadata struct {
 }
 
 type Check interface {
-	ID() string
-	Category() Category
 	Metadata() CheckMetadata
 	Run(ctx context.Context) Result
 }

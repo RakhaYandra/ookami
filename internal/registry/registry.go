@@ -15,7 +15,7 @@ func Ordered() []model.Check {
 func ByCategory(cat model.Category) []model.Check {
 	var r []model.Check
 	for _, c := range checks {
-		if c.Category() == cat {
+		if c.Metadata().Category == cat {
 			r = append(r, c)
 		}
 	}
