@@ -2,25 +2,45 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.1): CLI skeleton. `doctor` and `check` print a stub line; full checks land in later releases.
+> Status (v0.2): Phase 1 done. `doctor` is functional for system/development/storage (13 checks); network/gpu/services land in later phases.
 
 ## Example
 
 ```text
 $ ookami doctor
-System        ✓  OS and resources look healthy
-Development   ⚠  Go toolchain needs attention
-Storage       ✓  Disk space looks healthy
-Network       ✓  Connectivity looks healthy
-GPU           ⚠  Driver needs attention
-Services      ✓  Background services look healthy
+OOKAMI — Developer Machine Doctor
+
+System
+  ✓ OS Omarchy
+  ✓ Kernel 7.2.5-3-omarchy x86_64
+  ✓ CPU AMD Ryzen 7 7840HS w/ Radeon 780M Graphics (8 cores/16 threads, 79°C)
+  ✓ Memory 4.5 / 15 GB available (69% used)
+  ℹ Uptime 2h 18m
+Development
+  ✓ Git Git 2.55.0
+  ✓ Go Go 1.27.1
+  ✓ Node Node 26.8.1 (npm 11.19.0)
+  ✓ Python Python 3.14.8
+  ✓ PHP PHP 8.5.10
+  ✓ Docker Docker 29.7.2
+  ✓ Docker Daemon Docker daemon running
+Storage
+  ✓ / 29% used
+  ✓ /home 29% used
+  ✓ /var 29% used
+----------------------------------------
+Score: 100/100
+0 warnings, 0 critical issues
+Development environment is healthy.
 ```
 
-(Target format. v0.1 currently prints `doctor not yet implemented (Phase 1)`.)
+(Real output, 2026-10-08. Values are machine-specific and will differ on your host.)
 
 ## Features
 
-- `doctor`, `check`, and `version` CLI skeleton (Cobra)
+- Functional `doctor` (13 checks: 5 system, 7 development, 1 storage) with grouped human output, score, and status line
+- Working `--json` and `--quiet` output modes
+- `check <category>` for `system`, `development`, `storage` (`network`/`gpu`/`services` print a future-phase notice)
 - Category validation for `check`: `system|development|storage|network|gpu|services`
 - Exit codes 0–4 for scripting
 - `--no-color` flag and `NO_COLOR` env support, plus `--verbose`
@@ -44,8 +64,8 @@ make build        # produces ./bin/ookami
 
 | Command | Flags | Description |
 |---|---|---|
-| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (stub in v0.1; flags accepted, no effect yet) |
-| `ookami check <category>` | — | Single-category check (stub in v0.1); category must be `system`, `development`, `storage`, `network`, `gpu`, or `services` |
+| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (system/development/storage); `--json`/`--quiet` switch output, `--fix` prints a Phase 7 notice |
+| `ookami check <category>` | — | Single-category check; `system`, `development`, `storage` functional, `network`, `gpu`, `services` print a future-phase notice |
 | `ookami version` | — | Print version (`dev` unless built with `VERSION=...`) |
 | global | `--no-color`, `--verbose` | Disable color output; verbose output (`NO_COLOR` env also disables color) |
 
@@ -61,7 +81,7 @@ make build        # produces ./bin/ookami
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.1 does.
+Planned checks and automation are tracked internally; this README documents only what v0.2 does (Phase 1 complete).
 
 ## Contributing
 

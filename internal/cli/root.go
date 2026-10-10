@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -32,6 +33,10 @@ func NewRootCmd() *cobra.Command {
 
 func Execute() {
 	if err := NewRootCmd().Execute(); err != nil {
+		var ee *ExitError
+		if errors.As(err, &ee) {
+			os.Exit(ee.Code)
+		}
 		_, _ = os.Stderr.WriteString("Error: " + err.Error() + "\n")
 		os.Exit(4)
 	}

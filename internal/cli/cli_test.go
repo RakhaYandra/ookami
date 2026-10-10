@@ -2,8 +2,12 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"strings"
 	"testing"
+
+	"github.com/RakhaYandra/ookami/internal/model"
+	"github.com/RakhaYandra/ookami/internal/output"
 )
 
 func TestVersionOutput(t *testing.T) {
@@ -41,7 +45,25 @@ func TestDoctorFlags(t *testing.T) {
 	cmd := NewDoctorCmd()
 	cmd.SetOut(new(bytes.Buffer))
 	cmd.SetArgs([]string{"--json", "--quiet"})
-	if err := cmd.Execute(); err != nil {
-		t.Fatalf("doctor flags execute: %v", err)
+	err := cmd.Execute()
+	if err == nil {
+		return
+	}
+	var ee *ExitError
+	if errors.As(err, &ee) && (ee.Code == 1 || ee.Code == 2) {
+		return
+	}
+	t.Fatalf("doctor flags execute: %v", err)
+}
+
+func TestExitCodeMapsToExitError(t *testing.T) {
+	rs := []model.Result{{Severity: model.SeverityWarning}}
+	if got := output.ExitCode(rs, false, false); got != 1 {
+		t.Fatalf("warning ExitCode: want 1, got %d", got)
+	}
+	ee := &ExitError{Code: 1}
+	var target *ExitError
+	if !errors.As(ee, &target) || target.Code != 1 {
+		t.Fatal("errors.As(ExitError) failed")
 	}
 }

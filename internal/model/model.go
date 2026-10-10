@@ -51,5 +51,7 @@ type CheckMetadata struct {
 
 type Check interface {
 	Metadata() CheckMetadata
-	Run(ctx context.Context) Result
+	Run(ctx context.Context) []Result
 }
+
+func Single(r Result) []Result { return []Result{r} }

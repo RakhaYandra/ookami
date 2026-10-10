@@ -53,7 +53,43 @@ func TestRenderQuiet(t *testing.T) {
 
 func TestRenderHumanEmpty(t *testing.T) {
 	var buf bytes.Buffer
-	if err := RenderHuman(&buf, nil, 100, "OK"); err != nil {
+	if err := RenderHuman(&buf, nil, 100, "healthy"); err != nil {
 		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), "No results.") {
+		t.Errorf("empty output should contain %q, got %q", "No results.", buf.String())
+	}
+}
+
+func TestRenderHumanGrouped(t *testing.T) {
+	var buf bytes.Buffer
+	rs := []model.Result{
+		{Category: model.CategoryDevelopment, Severity: model.SeverityWarning, Title: "Go", Message: "old"},
+		{Category: model.CategorySystem, Severity: model.SeverityPass, Title: "OS", Message: "ok"},
+		{Category: model.CategoryDevelopment, Severity: model.SeverityCritical, Title: "Docker", Message: "down"},
+		{Category: model.CategorySystem, Severity: model.SeverityUnknown, Title: "Uptime", Message: "n/a"},
+	}
+	if err := RenderHuman(&buf, rs, 70, "critical"); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "OOKAMI") {
+		t.Errorf("missing header:\n%s", out)
+	}
+	sys := strings.Index(out, "System")
+	dev := strings.Index(out, "Development")
+	if sys < 0 || dev < 0 || sys > dev {
+		t.Errorf("categories not in order (System before Development):\n%s", out)
+	}
+	for _, want := range []string{"✓ OS ok", "⚠ Go old", "✗ Docker down", "? Uptime"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q:\n%s", want, out)
+		}
+	}
+	// unknown counts as warning: 1 warning + 1 unknown = 2 warnings, 1 critical
+	for _, want := range []string{"Score: 70/100", "2 warnings, 1 critical issue", "has critical issues"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing footer %q:\n%s", want, out)
+		}
 	}
 }

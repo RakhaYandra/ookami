@@ -13,7 +13,7 @@ type fakeCheck struct {
 }
 
 func (f fakeCheck) Metadata() model.CheckMetadata     { return model.CheckMetadata{ID: f.id, Category: f.cat} }
-func (f fakeCheck) Run(ctx context.Context) model.Result { return model.Result{ID: f.id} }
+func (f fakeCheck) Run(ctx context.Context) []model.Result { return model.Single(model.Result{ID: f.id}) }
 
 func TestRegisterOrderedByCategory(t *testing.T) {
 	Clear()

@@ -11,6 +11,8 @@ ookami/
 ├── cmd/ookami/main.go        # entrypoint, calls cli.Execute()
 ├── internal/
 │   ├── cli/                  # cobra commands: root, doctor, check, version
+│   ├── checks/               # concrete checks: OS/kernel/CPU/memory/uptime, toolchains, filesystem
+│   ├── doctor/               # DefaultChecks(), FilterByCategory(), concurrent RunAll()
 │   ├── config/               # Config, Default(), Load(), Validate()
 │   ├── model/                # Check, Result, Severity, Category, Remediation
 │   ├── output/               # RenderHuman/JSON/Quiet + ExitCode
@@ -28,6 +30,7 @@ Tests (`*_test.go`) sit next to each package.
 
 - **model**: core types. `Check` interface (`Metadata()` + `Run(ctx)`) returns a `Result`; `Severity` is `pass/info/warning/critical/unknown`; `CheckMetadata` carries `Category` and `Optional` flag.
 - **runner**: command execution abstraction. `OSRunner` runs binaries with a default 5s timeout; `MockRunner` replays scripted handlers and records calls for tests.
+- **checks + doctor**: concrete checks live in `checks` (OS, kernel, CPU, memory, uptime; git/go/node/python/php/docker/daemon; filesystem), each returning `[]Result` via a `Runner`; `doctor.DefaultChecks()` orders 13 checks system → development → storage, `FilterByCategory()` subsets them for `check <category>`, and `RunAll()` executes them concurrently with per-check timeouts while preserving input order (a panicking or empty check yields one `unknown` result).
 - **registry**: global check catalog. `Register()` appends, `Ordered()` returns a copy in registration order, `ByCategory()` filters by category.
 - **scoring**: aggregation stub. `Score(results)` folds severities into a 0–100 score plus a `healthy/warning/critical` status string.
 - **output**: rendering + exit codes. Human/JSON/quiet renderers; `ExitCode()`: 0 ok, 1 warning/unknown, 2 critical, 3 execution error, 4 invalid args.
