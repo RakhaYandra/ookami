@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-09
+
+### Added
+
+- Phase 4 GPU:
+  - `GPUSuite` in `internal/checks` (1 check → 3 results: NVIDIA driver via `nvidia-smi`, AMD via sysfs driver, CUDA info-only), wired through `doctor.DefaultChecks()` (18 checks total)
+  - Detection via `lspci -nn` with sysfs (`/sys/bus/pci/devices`) fallback; `glxinfo` best-effort only
+  - `check gpu` functional; no future-phase notices remain
+
 ## [0.4.0] - 2026-10-08
 
 ### Added

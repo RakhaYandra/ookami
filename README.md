@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.4): Phase 3 done. `doctor` is functional for system/development/storage/services/network (17 checks); gpu lands in a later phase.
+> Status (v0.5): Phase 4 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks).
 
 ## Example
 
@@ -35,6 +35,10 @@ Network
   ✓ Internet connected
   ✓ GitHub reachable
   ✓ Docker Hub reachable
+GPU
+  ✓ NVIDIA GeForce RTX 4050 Max-Q / Mobile driver 610.57.04
+  ✓ AMD Phoenix1 amdgpu
+  ℹ CUDA not installed
 Services
   ⚠ PostgreSQL installed, no systemd unit
   ℹ Redis not installed
@@ -49,9 +53,9 @@ Development environment needs attention.
 
 ## Features
 
-- Functional `doctor` (17 checks: 5 system, 7 development, 1 storage, 3 services, 1 network suite → 6 results) with grouped human output, score, and status line
+- Functional `doctor` (18 checks: 5 system, 7 development, 1 storage, 3 services, 1 network suite → 6 results, 1 gpu suite → 3 results) with grouped human output, score, and status line
 - Working `--json` and `--quiet` output modes
-- `check <category>` for `system`, `development`, `storage`, `services`, `network` (`gpu` prints a future-phase notice)
+- `check <category>` for `system`, `development`, `storage`, `services`, `network`, `gpu` (all functional)
 - Category validation for `check`: `system|development|storage|network|gpu|services`
 - Exit codes 0–4 for scripting
 - `--no-color` flag and `NO_COLOR` env support, plus `--verbose`
@@ -75,8 +79,8 @@ make build        # produces ./bin/ookami
 
 | Command | Flags | Description |
 |---|---|---|
-| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (system/development/storage/services/network); `--json`/`--quiet` switch output, `--fix` prints a Phase 7 notice |
-| `ookami check <category>` | — | Single-category check; `system`, `development`, `storage`, `services`, `network` functional, `gpu` prints a future-phase notice |
+| `ookami doctor` | `--fix`, `--json`, `--quiet` | Full health check (system/development/storage/services/network/gpu); `--json`/`--quiet` switch output, `--fix` prints a Phase 7 notice |
+| `ookami check <category>` | — | Single-category check; `system`, `development`, `storage`, `services`, `network`, `gpu` all functional |
 | `ookami version` | — | Print version (`dev` unless built with `VERSION=...`) |
 | global | `--no-color`, `--verbose` | Disable color output; verbose output (`NO_COLOR` env also disables color) |
 
@@ -92,7 +96,7 @@ make build        # produces ./bin/ookami
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.4 does (Phase 3 complete).
+Planned checks and automation are tracked internally; this README documents only what v0.5 does (Phase 4 complete).
 
 ## Contributing
 

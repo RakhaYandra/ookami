@@ -72,7 +72,7 @@ func TestService_NoUnitBinaryPresent(t *testing.T) {
 	m := &runner.MockRunner{} // no handler -> exec.ErrNotFound
 	rs := testSvcCheck(m, okPath).Run(context.Background())
 	r := rs[0]
-	if r.Severity != model.SeverityWarning || 	r.Message != "installed, no systemd unit" {
+	if r.Severity != model.SeverityWarning || r.Message != "installed, no systemd unit" {
 		t.Fatalf("got %+v", r)
 	}
 	if r.Remediation != nil {

@@ -64,6 +64,22 @@ func TestCheckServicesCategory(t *testing.T) {
 	t.Fatalf("check services execute: want nil or ExitError 0/1/2, got %v", err)
 }
 
+func TestCheckGPUCategory(t *testing.T) {
+	cmd := NewRootCmd()
+	cmd.SetOut(new(bytes.Buffer))
+	cmd.SetErr(new(bytes.Buffer))
+	cmd.SetArgs([]string{"check", "gpu"})
+	err := cmd.Execute()
+	if err == nil {
+		return
+	}
+	var ee *ExitError
+	if errors.As(err, &ee) && (ee.Code == 0 || ee.Code == 1 || ee.Code == 2) {
+		return
+	}
+	t.Fatalf("check gpu execute: want nil or ExitError 0/1/2, got %v", err)
+}
+
 func TestDoctorFlagParsing(t *testing.T) {
 	cmd := NewDoctorCmd()
 	if err := cmd.ParseFlags([]string{"--json", "--quiet", "--fix"}); err != nil {

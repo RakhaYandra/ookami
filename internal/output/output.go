@@ -34,6 +34,10 @@ func symbolFor(s model.Severity) string {
 }
 
 func categoryTitle(c model.Category) string {
+	switch c {
+	case model.CategoryGPU:
+		return "GPU"
+	}
 	s := string(c)
 	if s == "" {
 		return "Unknown"

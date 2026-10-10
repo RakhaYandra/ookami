@@ -16,7 +16,7 @@ import (
 // 45s covers NetworkSuite worst-case: 6 layers x 5s sequential in one check.
 const perCheckTimeout = 45 * time.Second
 
-// DefaultChecks returns 17 checks ordered system → development → storage → services → network.
+// DefaultChecks returns 18 checks ordered system → development → storage → services → network → gpu.
 func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 	return []model.Check{
 		// system (5)
@@ -41,6 +41,8 @@ func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 		checks.MySQLCheck(r, exec.LookPath),
 		// network (1)
 		checks.NetworkSuite{Cfg: cfg},
+		// gpu (1)
+		checks.GPUSuite{Runner: r},
 	}
 }
 

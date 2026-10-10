@@ -42,8 +42,8 @@ func (s stubCheck) Run(context.Context) []model.Result {
 
 func TestDefaultChecksOrder(t *testing.T) {
 	cs := DefaultChecks(config.Default(), runner.NewOSRunner(0))
-	if len(cs) != 17 {
-		t.Fatalf("want 17 checks, got %d", len(cs))
+	if len(cs) != 18 {
+		t.Fatalf("want 18 checks, got %d", len(cs))
 	}
 	want := []string{
 		"system-os", "system-kernel", "system-cpu", "system-memory", "system-uptime",
@@ -52,13 +52,14 @@ func TestDefaultChecksOrder(t *testing.T) {
 		"storage-fs",
 		"services-postgresql", "services-redis", "services-mysql",
 		"network-suite",
+		"gpu-suite",
 	}
 	for i, w := range want {
 		if got := cs[i].Metadata().ID; got != w {
 			t.Fatalf("index %d: want %s, got %s", i, w, got)
 		}
 	}
-	// Category order: system → development → storage → services → network (network last).
+	// Category order: system → development → storage → services → network → gpu (gpu last).
 	var cats []model.Category
 	for _, c := range cs {
 		cats = append(cats, c.Metadata().Category)
@@ -72,6 +73,7 @@ func TestDefaultChecksOrder(t *testing.T) {
 		model.CategoryStorage,
 		model.CategoryServices, model.CategoryServices, model.CategoryServices,
 		model.CategoryNetwork,
+		model.CategoryGPU,
 	} {
 		if cats[i] != wantCat {
 			t.Fatalf("index %d: want category %s, got %s", i, wantCat, cats[i])
@@ -95,6 +97,9 @@ func TestFilterByCategory(t *testing.T) {
 	}
 	if got := len(FilterByCategory(cs, model.CategoryNetwork)); got != 1 {
 		t.Fatalf("network: want 1, got %d", got)
+	}
+	if got := len(FilterByCategory(cs, model.CategoryGPU)); got != 1 {
+		t.Fatalf("gpu: want 1, got %d", got)
 	}
 }
 

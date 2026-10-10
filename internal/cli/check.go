@@ -14,10 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var futurePhase = map[model.Category]string{
-	model.CategoryGPU: "Phase 4",
-}
-
 func NewCheckCmd() *cobra.Command {
 	var jsonOut, quiet bool
 	cmd := &cobra.Command{
@@ -41,9 +37,6 @@ func NewCheckCmd() *cobra.Command {
 			}
 			r := runner.NewOSRunner(5 * time.Second)
 			checks := doctor.FilterByCategory(doctor.DefaultChecks(cfg, r), cat)
-			if phase, ok := futurePhase[cat]; ok {
-				fmt.Fprintf(cmd.ErrOrStderr(), "info: category %s lands in %s\n", cat, phase)
-			}
 			ctx, cancel := context.WithTimeout(cmd.Context(), 60*time.Second)
 			defer cancel()
 			rs := doctor.RunAll(ctx, checks)

@@ -22,12 +22,12 @@ const netRouteNoDefault = "Iface\tDestination\tGateway\tFlags\tRefCnt\tUse\tMetr
 
 func passNetSuite() NetworkSuite {
 	return NetworkSuite{
-		Cfg:        config.Config{NetworkTimeoutSec: 5},
-		Ifaces:     func() ([]net.Interface, error) { return []net.Interface{{Name: "wlo1", Flags: net.FlagUp}}, nil },
+		Cfg:         config.Config{NetworkTimeoutSec: 5},
+		Ifaces:      func() ([]net.Interface, error) { return []net.Interface{{Name: "wlo1", Flags: net.FlagUp}}, nil },
 		RouteReader: func() (io.Reader, error) { return strings.NewReader(netRouteSample), nil },
-		Resolve:    func(context.Context, string) error { return nil },
-		Dial:       func(context.Context, string, string) error { return nil },
-		Head:       func(string, time.Duration) (int, error) { return 200, nil },
+		Resolve:     func(context.Context, string) error { return nil },
+		Dial:        func(context.Context, string, string) error { return nil },
+		Head:        func(string, time.Duration) (int, error) { return 200, nil },
 	}
 }
 
