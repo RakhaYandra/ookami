@@ -81,11 +81,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 13 functional checks (5 system, 7 development, 1 storage) via `internal/checks`, wired through `internal/doctor`
   - Grouped `RenderHuman` output (category groups, severity symbols, score + warning/critical footer + status line)
 
-## [0.1.0] - 2026-10-08
+## [0.0.1] - 2026-10-08
 
 ### Added
 
-- Phase 0 foundation:
+- Phase 0 foundation (pre-release snapshot):
   - CLI skeleton (`doctor`, `check`, `version`) on Cobra
   - Core model, runner, and check registry
   - Scoring stub, exit codes (0-4), config, output stub
