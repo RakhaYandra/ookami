@@ -17,8 +17,9 @@ import (
 func NewCheckCmd() *cobra.Command {
 	var jsonOut, quiet bool
 	cmd := &cobra.Command{
-		Use:  "check [system|development|storage|network|gpu|services]",
-		Args: cobra.ExactArgs(1),
+		Use:   "check [system|development|storage|network|gpu|services]",
+		Short: "run checks for one category",
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cat := model.Category(args[0])
 			switch cat {

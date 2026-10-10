@@ -116,6 +116,24 @@ func TestRenderQuiet(t *testing.T) {
 	}
 }
 
+func TestRenderQuietSymbolAndMessage(t *testing.T) {
+	var buf bytes.Buffer
+	rs := []model.Result{
+		{Severity: model.SeverityWarning, Title: "PostgreSQL", Message: "installed, no systemd unit"},
+		{Severity: model.SeverityCritical, Title: "Disk", Message: "full"},
+		{Severity: model.SeverityUnknown, Title: "Uptime", Message: "n/a"},
+	}
+	if err := RenderQuiet(&buf, rs); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	for _, want := range []string{"⚠ PostgreSQL installed, no systemd unit", "✗ Disk full", "? Uptime n/a"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q:\n%s", want, out)
+		}
+	}
+}
+
 func TestRenderHumanEmpty(t *testing.T) {
 	var buf bytes.Buffer
 	if err := RenderHuman(&buf, nil, 100, "healthy"); err != nil {

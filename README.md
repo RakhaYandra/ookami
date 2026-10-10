@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.8): Phase 7 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, and opt-in `--fix` for safe service restarts.
+> Status (v0.1.0): Released. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, opt-in `--fix` for safe service restarts, and shell completion.
 
 ## Example
 
@@ -13,9 +13,9 @@ OOKAMI — Developer Machine Doctor
 System
   ✓ OS Omarchy
   ✓ Kernel 7.2.5-3-omarchy x86_64
-  ✓ CPU AMD Ryzen 7 7840HS w/ Radeon 780M Graphics (8 cores/16 threads, 61°C)
-  ✓ Memory 8.0 / 15 GB available (45% used)
-  ℹ Uptime 2m
+  ✓ CPU AMD Ryzen 7 7840HS w/ Radeon 780M Graphics (8 cores/16 threads, 77°C)
+  ✓ Memory 5.6 / 15 GB available (61% used)
+  ℹ Uptime 1h 40m
 Development
   ✓ Git 2.55.0
   ✓ Go 1.27.1
@@ -81,6 +81,23 @@ JSON output (`--json`) includes ordered `categories` breakdown:
 - Linux
 - Go 1.27+
 
+## Installation
+
+```sh
+go install github.com/RakhaYandra/ookami/cmd/ookami@latest
+```
+
+Or download a `ookami_<version>_linux_<arch>.tar.gz` binary from
+[GitHub Releases](https://github.com/RakhaYandra/ookami/releases),
+extract, and place `ookami` on your `PATH`.
+
+Shell completion (cobra-generated):
+
+```sh
+ookami completion bash > /etc/bash_completion.d/ookami  # or source it
+source <(ookami completion bash)
+```
+
 ## Quick Start
 
 ```sh
@@ -112,11 +129,11 @@ make build        # produces ./bin/ookami
 
 ## Automation
 
-`--json` schema is stable for v0.1: `{score, status, categories[], results[]}`, with `categories` ordered `system, development, storage, network, gpu, services`. Adding keys is minor; removing/renaming is breaking. `--quiet` prints only `warning|critical|unknown` titles (`⚠ <Title>`); `--verbose` adds sorted `key=value` detail lines to human output. `--json` wins over `--quiet` when both are passed.
+`--json` schema is stable for v0.1: `{score, status, categories[], results[]}`, with `categories` ordered `system, development, storage, network, gpu, services`. Adding keys is minor; removing/renaming is breaking. `--quiet` prints only `warning|critical|unknown` findings as `<symbol> <Title> <Message>` (`⚠/✗/?` per severity); `--verbose` adds sorted `key=value` detail lines to human output. `--json` wins over `--quiet` when both are passed.
 
 ```sh
 ookami doctor --quiet; echo $?
-# ⚠ PostgreSQL → exit 1 (live host, 2026-10-09)
+# ⚠ PostgreSQL installed, no systemd unit → exit 1 (live host, 2026-10-09)
 ```
 
 ## Auto-fix
@@ -141,7 +158,7 @@ echo n | ookami doctor --fix
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.8 does (Phase 7 complete).
+Planned checks and automation are tracked internally; this README documents only what v0.1.0 does (Phase 8 complete, released).
 
 ## Contributing
 

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `doctor --fix` allowlist engine: only `systemctl start|restart <unit>`, TTY-gated `[y/N]` confirmation, per-item result plus rerun
   - `check <category>` per-category runs with remediation hints (`→ Suggested action:`)
   - Docs: README, CONTRIBUTING, docs/ (architecture, checks catalogue, scoring, exit codes, output contract)
+- Polish: CI workflow (`make build/vet/test`, `gofmt` check, `golangci-lint run` 0 issues), GoReleaser (linux amd64/arm64 tar.gz + checksums), `check` Short for root help, `RenderQuiet` per-severity symbols with `Title + Message` (`⚠/✗/?`)
 
 ## [0.8.0] - 2026-10-09
 

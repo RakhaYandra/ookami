@@ -24,6 +24,13 @@ func TestVersionOutput(t *testing.T) {
 	}
 }
 
+func TestCheckHasShort(t *testing.T) {
+	cmd := NewCheckCmd()
+	if strings.TrimSpace(cmd.Short) == "" {
+		t.Fatal("check Short must not be empty (root --help shows blank)")
+	}
+}
+
 func TestCheckInvalidCategory(t *testing.T) {
 	cmd := NewRootCmd()
 	cmd.SetOut(new(bytes.Buffer))

@@ -243,7 +243,11 @@ func RenderQuiet(w io.Writer, rs []model.Result) error {
 		if r.Severity != model.SeverityWarning && r.Severity != model.SeverityCritical && r.Severity != model.SeverityUnknown {
 			continue
 		}
-		if _, err := fmt.Fprintf(w, "⚠ %s\n", r.Title); err != nil {
+		line := r.Title
+		if r.Message != "" {
+			line += " " + r.Message
+		}
+		if _, err := fmt.Fprintf(w, "%s %s\n", symbolFor(r.Severity), strings.TrimSpace(line)); err != nil {
 			return err
 		}
 	}

@@ -42,6 +42,10 @@ Tests (`*_test.go`) sit next to each package.
 - **fixer**: opt-in fix engine (`internal/fixer`). `Plan()` selects warning/critical results with remediation data and marks allowed only `systemctl start|restart <unit>` (exactly 2 args, unit validated against `^[a-zA-Z0-9@._:\-]+$`); `Confirm()` prompts `Execute? [y/N]` on stdout, gated on TTY (non-TTY auto-declines without reading stdin) and accepts only `y/yes`; `Apply()` executes the fixed argv directly via `Runner` (prefix `sudo` when euid ≠ 0, never handling passwords), prints per-item `✓ fixed` / `✗ <first error line>` / `skipped.` lines, and continues past failures. `doctor --fix` renders, applies, emits a `fix: N fixed, N failed, N skipped.` summary to stderr, then re-runs all checks on a fresh context and renders again; `--fix` forces human output even with `--json`/`--quiet`. There is no `--yes` flag — every fix requires a human answer.
 - **cli** (cobra): user entry. Root command wires `doctor` (`--fix/--json/--quiet`), `check <category>`, and `version`; global `--no-color/--verbose` flags; errors exit non-zero.
 
+## Tooling
+
+CI (`.github/workflows/ci.yml`) runs `make build`, `make vet`, `make test` (`go test -race ./...`), a `gofmt -l` empty check, and `golangci-lint run` (currently 0 issues) on push/PR to `main` with Go 1.27. Releases use GoReleaser (`.goreleaser.yaml`): static (`CGO_ENABLED=0`) linux amd64/arm64 binaries with version injected via `-X .../internal/cli.Version`, packed as `tar.gz` + `checksums.txt`. Shell completion is free from Cobra (`ookami completion bash|zsh|fish|powershell`).
+
 ## Flow
 
 ```
