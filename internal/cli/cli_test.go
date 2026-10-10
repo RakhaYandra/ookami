@@ -35,10 +35,17 @@ func TestCheckInvalidCategory(t *testing.T) {
 func TestCheckValidCategory(t *testing.T) {
 	cmd := NewRootCmd()
 	cmd.SetOut(new(bytes.Buffer))
+	cmd.SetErr(new(bytes.Buffer))
 	cmd.SetArgs([]string{"check", "network"})
-	if err := cmd.Execute(); err != nil {
-		t.Fatalf("check network execute: %v", err)
+	err := cmd.Execute()
+	if err == nil {
+		return
 	}
+	var ee *ExitError
+	if errors.As(err, &ee) && (ee.Code == 0 || ee.Code == 1 || ee.Code == 2) {
+		return
+	}
+	t.Fatalf("check network execute: want nil or ExitError 0/1/2, got %v", err)
 }
 
 func TestCheckServicesCategory(t *testing.T) {

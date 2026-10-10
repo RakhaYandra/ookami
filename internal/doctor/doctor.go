@@ -13,9 +13,10 @@ import (
 )
 
 // perCheckTimeout bounds a single check; total budget (60s) is set by callers.
-const perCheckTimeout = 15 * time.Second
+// 45s covers NetworkSuite worst-case: 6 layers x 5s sequential in one check.
+const perCheckTimeout = 45 * time.Second
 
-// DefaultChecks returns 16 checks ordered system → development → storage → services.
+// DefaultChecks returns 17 checks ordered system → development → storage → services → network.
 func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 	return []model.Check{
 		// system (5)
@@ -38,6 +39,8 @@ func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 		checks.PostgreSQLCheck(r, exec.LookPath),
 		checks.RedisCheck(r, exec.LookPath),
 		checks.MySQLCheck(r, exec.LookPath),
+		// network (1)
+		checks.NetworkSuite{Cfg: cfg},
 	}
 }
 

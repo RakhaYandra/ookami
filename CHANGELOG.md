@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-08
+
+### Added
+
+- Phase 3 network:
+  - `NetworkSuite` in `internal/checks` (1 check → 6 results: interface, gateway, DNS, internet, GitHub, Docker Hub), wired through `doctor.DefaultChecks()` (17 checks total)
+  - `check network` functional; only `gpu` still prints a future-phase notice
+  - `doctor` per-check timeout raised to 45s (covers suite worst-case: 6 layers × 5s sequential)
+
 ## [0.3.0] - 2026-10-08
 
 ### Added
