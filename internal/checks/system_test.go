@@ -159,7 +159,7 @@ func TestUptimeCheck_Format(t *testing.T) {
 func TestUptimeCheck_Unreadable(t *testing.T) {
 	c := UptimeCheck{UptimePath: filepath.Join(t.TempDir(), "missing")}
 	rs := c.Run(context.Background())
-	if rs[0].Severity != model.SeverityUnknown {
+	if rs[0].Severity != model.SeverityInfo {
 		t.Fatalf("got %+v", rs[0])
 	}
 }

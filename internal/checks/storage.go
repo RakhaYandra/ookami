@@ -85,10 +85,24 @@ func (c FilesystemCheck) Run(ctx context.Context) []Result {
 	for _, m := range mounts {
 		raw, err := c.Runner.Run(ctx, "df", "-kP", m)
 		if err != nil {
+			out = append(out, model.Result{
+				ID:       "storage-fs-" + sanitizeMount(m),
+				Category: model.CategoryStorage,
+				Title:    m,
+				Severity: model.SeverityUnknown,
+				Message:  "unreadable",
+			})
 			continue
 		}
 		usePct, err := parseDF(string(raw))
 		if err != nil {
+			out = append(out, model.Result{
+				ID:       "storage-fs-" + sanitizeMount(m),
+				Category: model.CategoryStorage,
+				Title:    m,
+				Severity: model.SeverityUnknown,
+				Message:  "unreadable",
+			})
 			continue
 		}
 		r := model.Result{

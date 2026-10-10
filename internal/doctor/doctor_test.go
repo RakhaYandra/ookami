@@ -2,7 +2,9 @@ package doctor
 
 import (
 	"context"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/RakhaYandra/ookami/internal/config"
 	"github.com/RakhaYandra/ookami/internal/model"
@@ -16,6 +18,27 @@ func (panicCheck) Metadata() model.CheckMetadata {
 }
 
 func (panicCheck) Run(context.Context) []model.Result { panic("boom") }
+
+// stubCheck is a hermetic stand-in: no host paths, no runner.
+type stubCheck struct {
+	id     string
+	delay  time.Duration
+	record func(string)
+}
+
+func (s stubCheck) Metadata() model.CheckMetadata {
+	return model.CheckMetadata{ID: s.id, Name: s.id, Category: model.CategorySystem}
+}
+
+func (s stubCheck) Run(context.Context) []model.Result {
+	if s.delay > 0 {
+		time.Sleep(s.delay)
+	}
+	if s.record != nil {
+		s.record(s.id)
+	}
+	return model.Single(model.Result{ID: s.id, Category: model.CategorySystem, Title: s.id, Severity: model.SeverityPass, Message: "ok"})
+}
 
 func TestDefaultChecksOrder(t *testing.T) {
 	cs := DefaultChecks(config.Default(), runner.NewOSRunner(0))
@@ -62,12 +85,28 @@ func TestRunAllRecoversPanic(t *testing.T) {
 }
 
 func TestRunAllDeterministicOrder(t *testing.T) {
-	cs := DefaultChecks(config.Default(), runner.NewOSRunner(0))
-	rs := RunAll(context.Background(), FilterByCategory(cs, model.CategorySystem))
-	if len(rs) == 0 {
-		t.Fatal("want non-empty results")
+	var mu sync.Mutex
+	var ran []string
+	stub := func(id string, delay time.Duration) model.Check {
+		return stubCheck{id: id, delay: delay, record: func(id string) {
+			mu.Lock()
+			ran = append(ran, id)
+			mu.Unlock()
+		}}
 	}
-	if rs[0].ID != "system-os" {
-		t.Fatalf("want first result system-os, got %s", rs[0].ID)
+	// First check sleeps longest: input order must win over completion order.
+	cs := []model.Check{
+		stub("test-a", 60*time.Millisecond),
+		stub("test-b", 20*time.Millisecond),
+		stub("test-c", 0),
+	}
+	rs := RunAll(context.Background(), cs)
+	if len(rs) != len(cs) {
+		t.Fatalf("want %d results, got %d", len(cs), len(rs))
+	}
+	for i, w := range []string{"test-a", "test-b", "test-c"} {
+		if rs[i].ID != w {
+			t.Fatalf("index %d: want %s, got %s", i, w, rs[i].ID)
+		}
 	}
 }

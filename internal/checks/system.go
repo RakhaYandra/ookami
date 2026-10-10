@@ -322,19 +322,19 @@ func (c UptimeCheck) Run(_ context.Context) []Result {
 	}
 	b, err := os.ReadFile(path)
 	if err != nil {
-		base.Severity = model.SeverityUnknown
+		base.Severity = model.SeverityInfo
 		base.Message = "uptime unreadable"
 		return model.Single(base)
 	}
 	fields := strings.Fields(string(b))
 	if len(fields) == 0 {
-		base.Severity = model.SeverityUnknown
+		base.Severity = model.SeverityInfo
 		base.Message = "uptime unreadable"
 		return model.Single(base)
 	}
 	sec, err := strconv.ParseFloat(fields[0], 64)
 	if err != nil {
-		base.Severity = model.SeverityUnknown
+		base.Severity = model.SeverityInfo
 		base.Message = "uptime unreadable"
 		return model.Single(base)
 	}

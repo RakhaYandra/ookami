@@ -41,19 +41,31 @@ func TestCheckValidCategory(t *testing.T) {
 	}
 }
 
-func TestDoctorFlags(t *testing.T) {
+func TestDoctorFlagParsing(t *testing.T) {
 	cmd := NewDoctorCmd()
-	cmd.SetOut(new(bytes.Buffer))
-	cmd.SetArgs([]string{"--json", "--quiet"})
-	err := cmd.Execute()
-	if err == nil {
-		return
+	if err := cmd.ParseFlags([]string{"--json", "--quiet", "--fix"}); err != nil {
+		t.Fatalf("parse flags: %v", err)
 	}
-	var ee *ExitError
-	if errors.As(err, &ee) && (ee.Code == 1 || ee.Code == 2) {
-		return
+	for flag := range map[string]bool{"json": true, "quiet": true, "fix": true} {
+		got, err := cmd.Flags().GetBool(flag)
+		if err != nil {
+			t.Fatalf("get --%s: %v", flag, err)
+		}
+		if !got {
+			t.Fatalf("want --%s=true after parsing", flag)
+		}
 	}
-	t.Fatalf("doctor flags execute: %v", err)
+
+	def := NewDoctorCmd()
+	for _, flag := range []string{"json", "quiet", "fix"} {
+		got, err := def.Flags().GetBool(flag)
+		if err != nil {
+			t.Fatalf("get default --%s: %v", flag, err)
+		}
+		if got {
+			t.Fatalf("want default --%s=false", flag)
+		}
+	}
 }
 
 func TestExitCodeMapsToExitError(t *testing.T) {

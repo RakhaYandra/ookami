@@ -57,13 +57,21 @@ func TestFilesystemCheck_Critical(t *testing.T) {
 	}
 }
 
-func TestFilesystemCheck_DFErrorSkipped(t *testing.T) {
+func TestFilesystemCheck_DFErrorExplicit(t *testing.T) {
 	m := &runner.MockRunner{Handlers: map[string]func([]string) ([]byte, error){
 		"df": func([]string) ([]byte, error) { return nil, errors.New("no df") },
 	}}
 	rs := FilesystemCheck{Runner: m, Cfg: config.Default(), Mounts: []string{"/", "/home"}}.Run(context.Background())
-	if len(rs) != 0 {
-		t.Fatalf("want 0 results, got %+v", rs)
+	if len(rs) != 2 {
+		t.Fatalf("want 2 results, got %+v", rs)
+	}
+	for i, wantID := range []string{"storage-fs-root", "storage-fs-home"} {
+		if rs[i].ID != wantID || rs[i].Severity != model.SeverityUnknown || rs[i].Message != "unreadable" {
+			t.Fatalf("idx %d got %+v", i, rs[i])
+		}
+		if rs[i].Category != model.CategoryStorage {
+			t.Fatalf("idx %d wrong category: %+v", i, rs[i])
+		}
 	}
 }
 
