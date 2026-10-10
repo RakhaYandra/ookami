@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.5): Phase 4 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks).
+> Status (v0.6): Phase 5 done. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring.
 
 ## Example
 
@@ -44,12 +44,24 @@ Services
   ℹ Redis not installed
   ℹ MySQL not installed
 ----------------------------------------
-Score: 95/100
+Score: 99/100
 1 warning, 0 critical issues
 Development environment needs attention.
 ```
 
-(Real output, 2026-10-08, exit 1. Values are machine-specific and will differ on your host.)
+(Real output, 2026-10-09, exit 1. Values are machine-specific and will differ on your host.)
+
+## How scoring works
+
+Weighted per-category score (0–100): system 20, development 30, storage 15, network 15, services 10, gpu 10. Each category starts at 100 with penalti 25/5/2 per critical/warning/unknown result (pass/info no effect, floor 0); global score is the weight-averaged sum over active categories only (renormalisasi kategori absen). GPU eksklusi bila tak ada hardware (`gpu-none` info-only excluded; single-category `check` renormalizes to its own weight). Live example above: 5 categories at 100 + services at 95 → (90×100+95×10)/100=99, status `warning`.
+
+JSON output (`--json`) includes ordered `categories` breakdown:
+
+```json
+{"score":100,"status":"healthy","categories":[{"category":"network","status":"healthy","score":100}],"results":[{"ID":"network-interface","Category":"network","Severity":"pass","Title":"Interface","Message":"enp2s0 up","Details":{"latency_ms":0},"Remediation":null},{"ID":"network-gateway","Category":"network","Severity":"pass","Title":"Gateway","Message":"default route present","Details":{"latency_ms":0},"Remediation":null},{"ID":"network-dns","Category":"network","Severity":"pass","Title":"DNS","Message":"github.com resolves","Details":{"latency_ms":183},"Remediation":null},{"ID":"network-internet","Category":"network","Severity":"pass","Title":"Internet","Message":"connected","Details":{"latency_ms":35},"Remediation":null},{"ID":"network-github","Category":"network","Severity":"pass","Title":"GitHub","Message":"reachable","Details":{"latency_ms":187},"Remediation":null},{"ID":"network-hub","Category":"network","Severity":"pass","Title":"Docker Hub","Message":"reachable","Details":{"latency_ms":1117},"Remediation":null}]}
+```
+
+(`go run ./cmd/ookami check network --json`, 2026-10-09. `latency_ms` values are machine-specific.)
 
 ## Features
 
@@ -96,7 +108,7 @@ make build        # produces ./bin/ookami
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.5 does (Phase 4 complete).
+Planned checks and automation are tracked internally; this README documents only what v0.6 does (Phase 5 complete).
 
 ## Contributing
 

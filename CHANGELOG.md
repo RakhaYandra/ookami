@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-09
+
+### Added
+
+- Phase 5 scoring:
+  - Weighted `Breakdown()` in `internal/scoring` (weights system 20 / development 30 / storage 15 / network 15 / services 10 / gpu 10; penalties 25 critical / 5 warning / 2 unknown, floor 0; global = weight-averaged over active categories only, integer division)
+  - Renormalization: absent categories excluded from divisor; `gpu-none` (no hardware) excluded alone and with others; `check <category>` scores 100× its own weight
+  - `--json` (`doctor` + `check`) now emits ordered `categories: [{category,status,score}]` via `RenderJSONBreakdown` (follows `scoring.CategoryOrder`); legacy `RenderJSON` kept for compat
+  - Live `doctor` score 95 → 99 on same host (5 categories at 100 + services at 95: `(90×100+95×10)/100=99`); 18 checks total unchanged
+
 ## [0.5.0] - 2026-10-09
 
 ### Added

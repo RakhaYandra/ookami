@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/RakhaYandra/ookami/internal/model"
+	"github.com/RakhaYandra/ookami/internal/scoring"
 )
 
 var categoryOrder = []model.Category{
@@ -153,6 +154,37 @@ func RenderJSON(w io.Writer, rs []model.Result, score int, status string) error 
 		Status  string         `json:"status"`
 		Results []model.Result `json:"results"`
 	}{score, status, rs})
+}
+
+// CategoryJSON is one ordered breakdown entry for JSON output.
+type CategoryJSON struct {
+	Category string `json:"category"`
+	Status   string `json:"status"`
+	Score    int    `json:"score"`
+}
+
+// RenderJSONBreakdown renders score/status/categories/results.
+// Categories follow scoring.CategoryOrder (active subset only).
+// Deprecated RenderJSON (no categories) still works for compat.
+func RenderJSONBreakdown(w io.Writer, rs []model.Result) error {
+	if rs == nil {
+		rs = []model.Result{}
+	}
+	score, status, cats := scoring.Breakdown(rs)
+	ordered := make([]CategoryJSON, 0, len(cats))
+	for _, c := range scoring.CategoryOrder {
+		cs, ok := cats[c]
+		if !ok {
+			continue
+		}
+		ordered = append(ordered, CategoryJSON{Category: string(c), Status: cs.Status, Score: cs.Score})
+	}
+	return json.NewEncoder(w).Encode(struct {
+		Score      int            `json:"score"`
+		Status     string         `json:"status"`
+		Categories []CategoryJSON `json:"categories"`
+		Results    []model.Result `json:"results"`
+	}{score, status, ordered, rs})
 }
 
 func RenderQuiet(w io.Writer, rs []model.Result) error {

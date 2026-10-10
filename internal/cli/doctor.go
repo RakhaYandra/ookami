@@ -28,7 +28,6 @@ func NewDoctorCmd() *cobra.Command {
 			ctx, cancel := context.WithTimeout(cmd.Context(), 60*time.Second)
 			defer cancel()
 			rs := doctor.RunAll(ctx, checks)
-			score, status := scoring.Score(rs)
 			if fix {
 				fmt.Fprintln(cmd.ErrOrStderr(), "info: fix engine lands in Phase 7")
 			}
@@ -36,10 +35,11 @@ func NewDoctorCmd() *cobra.Command {
 			var rerr error
 			switch {
 			case jsonOut:
-				rerr = output.RenderJSON(out, rs, score, status)
+				rerr = output.RenderJSONBreakdown(out, rs)
 			case quiet:
 				rerr = output.RenderQuiet(out, rs)
 			default:
+				score, status := scoring.Score(rs)
 				rerr = output.RenderHuman(out, rs, score, status)
 			}
 			if rerr != nil {
