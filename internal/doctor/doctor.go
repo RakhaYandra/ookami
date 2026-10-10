@@ -2,6 +2,7 @@ package doctor
 
 import (
 	"context"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 // perCheckTimeout bounds a single check; total budget (60s) is set by callers.
 const perCheckTimeout = 15 * time.Second
 
-// DefaultChecks returns 13 checks ordered system → development → storage.
+// DefaultChecks returns 16 checks ordered system → development → storage → services.
 func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 	return []model.Check{
 		// system (5)
@@ -33,6 +34,10 @@ func DefaultChecks(cfg config.Config, r runner.Runner) []model.Check {
 		checks.DockerDaemonCheck{Runner: r},
 		// storage (1)
 		checks.FilesystemCheck{Runner: r, Cfg: cfg},
+		// services (3)
+		checks.PostgreSQLCheck(r, exec.LookPath),
+		checks.RedisCheck(r, exec.LookPath),
+		checks.MySQLCheck(r, exec.LookPath),
 	}
 }
 

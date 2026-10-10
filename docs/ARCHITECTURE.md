@@ -11,7 +11,7 @@ ookami/
 ├── cmd/ookami/main.go        # entrypoint, calls cli.Execute()
 ├── internal/
 │   ├── cli/                  # cobra commands: root, doctor, check, version
-│   ├── checks/               # concrete checks: OS/kernel/CPU/memory/uptime, toolchains, filesystem
+│   ├── checks/               # concrete checks: OS/kernel/CPU/memory/uptime, toolchains, filesystem, systemd services
 │   ├── doctor/               # DefaultChecks(), FilterByCategory(), concurrent RunAll()
 │   ├── config/               # Config, Default(), Load(), Validate()
 │   ├── model/                # Check, Result, Severity, Category, Remediation
@@ -30,7 +30,8 @@ Tests (`*_test.go`) sit next to each package.
 
 - **model**: core types. `Check` interface (`Metadata()` + `Run(ctx)`) returns a `Result`; `Severity` is `pass/info/warning/critical/unknown`; `CheckMetadata` carries `Category` and `Optional` flag.
 - **runner**: command execution abstraction. `OSRunner` runs binaries with a default 5s timeout; `MockRunner` replays scripted handlers and records calls for tests.
-- **checks + doctor**: concrete checks live in `checks` (OS, kernel, CPU, memory, uptime; git/go/node/python/php/docker/daemon; filesystem), each returning `[]Result` via a `Runner`; `doctor.DefaultChecks()` orders 13 checks system → development → storage, `FilterByCategory()` subsets them for `check <category>`, and `RunAll()` executes them concurrently with per-check timeouts while preserving input order (a panicking or empty check yields one `unknown` result).
+- **checks + doctor**: concrete checks live in `checks` (OS, kernel, CPU, memory, uptime; git/go/node/python/php/docker/daemon; filesystem; PostgreSQL/Redis/MySQL services), each returning `[]Result` via a `Runner`; `doctor.DefaultChecks()` orders 16 checks system → development → storage → services, `FilterByCategory()` subsets them for `check <category>`, and `RunAll()` executes them concurrently with per-check timeouts while preserving input order (a panicking or empty check yields one `unknown` result).
+- **services**: one generic `SystemdServiceCheck` backs all three service checks (PostgreSQL, Redis, MySQL), each configured with candidate `UnitNames` plus fallback `Binaries`. It probes `systemctl show -p LoadState -p ActiveState <unit>` and treats `LoadState=loaded` + `ActiveState=active` as pass (running) and loaded-but-inactive as warning (stopped); when no unit is loaded it falls back to binary presence via `LookPath` (installed without a unit → warning, neither → info). Remediation is data-only: a stopped unit carries a `Remediation{Command: "systemctl", Args: ["start", unit], Safe: true, RequiresSudo: true}` payload, but nothing auto-applies — `--fix` still prints the Phase 7 notice.
 - **registry**: global check catalog. `Register()` appends, `Ordered()` returns a copy in registration order, `ByCategory()` filters by category.
 - **scoring**: aggregation stub. `Score(results)` folds severities into a 0–100 score plus a `healthy/warning/critical` status string.
 - **output**: rendering + exit codes. Human/JSON/quiet renderers; `ExitCode()`: 0 ok, 1 warning/unknown, 2 critical, 3 execution error, 4 invalid args.

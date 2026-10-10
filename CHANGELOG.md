@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-08
+
+### Added
+
+- Phase 2 services:
+  - 3 functional checks (PostgreSQL, Redis, MySQL) via generic `SystemdServiceCheck` in `internal/checks`, wired through `doctor.DefaultChecks()` (16 checks total)
+  - `check services` functional; `network`/`gpu` still print a future-phase notice
+
 ## [0.2.0] - 2026-10-08
 
 ### Added

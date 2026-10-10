@@ -15,9 +15,8 @@ import (
 )
 
 var futurePhase = map[model.Category]string{
-	model.CategoryNetwork:  "Phase 2",
-	model.CategoryGPU:      "Phase 3",
-	model.CategoryServices: "Phase 4",
+	model.CategoryNetwork: "Phase 3",
+	model.CategoryGPU:     "Phase 4",
 }
 
 func NewCheckCmd() *cobra.Command {
