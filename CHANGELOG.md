@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-10-09
+
+### Added
+
+- Initial stable release (Phase 0–7 history retained below as 0.2.0–0.8.0):
+  - `doctor`: 18 checks across 6 categories (system, development, storage, network, gpu, services)
+  - Weighted scoring with per-category breakdown and renormalization for absent categories
+  - Output modes: grouped human, `--json` (ordered categories), `--quiet`, `--verbose` (`--json` wins over `--quiet`)
+  - Exit codes 0-4 (ok / warning / critical / usage-config error)
+  - `doctor --fix` allowlist engine: only `systemctl start|restart <unit>`, TTY-gated `[y/N]` confirmation, per-item result plus rerun
+  - `check <category>` per-category runs with remediation hints (`→ Suggested action:`)
+  - Docs: README, CONTRIBUTING, docs/ (architecture, checks catalogue, scoring, exit codes, output contract)
+
 ## [0.8.0] - 2026-10-09
 
 ### Added
