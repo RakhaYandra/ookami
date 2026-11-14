@@ -1,4 +1,4 @@
-VERSION ?= 0.1.0
+VERSION ?= 0.1.1
 BIN := bin/ookami
 LDFLAGS := -X github.com/RakhaYandra/ookami/internal/cli.Version=$(VERSION)
 
