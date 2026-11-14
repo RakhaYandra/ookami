@@ -201,10 +201,11 @@ func RenderJSON(w io.Writer, rs []model.Result, score int, status string) error 
 		rs = []model.Result{}
 	}
 	return json.NewEncoder(w).Encode(struct {
-		Score   int            `json:"score"`
-		Status  string         `json:"status"`
-		Results []model.Result `json:"results"`
-	}{score, status, rs})
+		SchemaVersion int            `json:"schema_version"`
+		Score         int            `json:"score"`
+		Status        string         `json:"status"`
+		Results       []model.Result `json:"results"`
+	}{1, score, status, rs})
 }
 
 // CategoryJSON is one ordered breakdown entry for JSON output.
@@ -231,11 +232,12 @@ func RenderJSONBreakdown(w io.Writer, rs []model.Result) error {
 		ordered = append(ordered, CategoryJSON{Category: string(c), Status: cs.Status, Score: cs.Score})
 	}
 	return json.NewEncoder(w).Encode(struct {
-		Score      int            `json:"score"`
-		Status     string         `json:"status"`
-		Categories []CategoryJSON `json:"categories"`
-		Results    []model.Result `json:"results"`
-	}{score, status, ordered, rs})
+		SchemaVersion int            `json:"schema_version"`
+		Score         int            `json:"score"`
+		Status        string         `json:"status"`
+		Categories    []CategoryJSON `json:"categories"`
+		Results       []model.Result `json:"results"`
+	}{1, score, status, ordered, rs})
 }
 
 func RenderQuiet(w io.Writer, rs []model.Result) error {

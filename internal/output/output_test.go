@@ -16,10 +16,14 @@ func TestRenderJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	var v struct {
-		Score int `json:"score"`
+		SchemaVersion int `json:"schema_version"`
+		Score         int `json:"score"`
 	}
 	if err := json.Unmarshal(buf.Bytes(), &v); err != nil {
 		t.Fatal(err)
+	}
+	if v.SchemaVersion != 1 {
+		t.Fatalf("schema_version=%d", v.SchemaVersion)
 	}
 	if v.Score != 100 {
 		t.Fatalf("score=%d", v.Score)
@@ -38,9 +42,10 @@ func TestRenderJSONBreakdownOrdered(t *testing.T) {
 		t.Fatal(err)
 	}
 	var v struct {
-		Score      int    `json:"score"`
-		Status     string `json:"status"`
-		Categories []struct {
+		SchemaVersion int    `json:"schema_version"`
+		Score         int    `json:"score"`
+		Status        string `json:"status"`
+		Categories    []struct {
 			Category string `json:"category"`
 			Status   string `json:"status"`
 			Score    int    `json:"score"`
@@ -48,6 +53,9 @@ func TestRenderJSONBreakdownOrdered(t *testing.T) {
 	}
 	if err := json.Unmarshal(buf.Bytes(), &v); err != nil {
 		t.Fatal(err)
+	}
+	if v.SchemaVersion != 1 {
+		t.Fatalf("schema_version=%d", v.SchemaVersion)
 	}
 	want := []string{"system", "development", "network", "services"}
 	if len(v.Categories) != len(want) {
@@ -75,12 +83,16 @@ func TestRenderJSONBreakdownGPUNoneExcluded(t *testing.T) {
 		t.Fatal(err)
 	}
 	var v struct {
-		Categories []struct {
+		SchemaVersion int `json:"schema_version"`
+		Categories    []struct {
 			Category string `json:"category"`
 		} `json:"categories"`
 	}
 	if err := json.Unmarshal(buf.Bytes(), &v); err != nil {
 		t.Fatal(err)
+	}
+	if v.SchemaVersion != 1 {
+		t.Fatalf("schema_version=%d", v.SchemaVersion)
 	}
 	for _, c := range v.Categories {
 		if c.Category == "gpu" {
