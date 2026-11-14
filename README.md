@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.1.0): Released. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, opt-in `--fix` for safe service restarts, and shell completion.
+> Status (v0.1.1): Released. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, opt-in `--fix` for safe service restarts, and shell completion.
 
 ## Example
 
@@ -160,7 +160,7 @@ echo n | ookami doctor --fix
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents only what v0.1.0 does (Phase 8 complete, released).
+Planned checks and automation are tracked internally; this README documents what v0.1.1 does (Phase 8 complete, released; `--json` carries `schema_version: 1`).
 
 ## Contributing
 
