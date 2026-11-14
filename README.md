@@ -87,6 +87,8 @@ JSON output (`--json`) includes ordered `categories` breakdown:
 go install github.com/RakhaYandra/ookami/cmd/ookami@latest
 ```
 
+Or, from a checkout, `make install` (builds and installs to `~/.local/bin/ookami`; override with `PREFIX`).
+
 Or download a `ookami_<version>_linux_<arch>.tar.gz` binary from
 [GitHub Releases](https://github.com/RakhaYandra/ookami/releases),
 extract, and place `ookami` on your `PATH`.
