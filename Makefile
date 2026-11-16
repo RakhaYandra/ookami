@@ -1,4 +1,4 @@
-VERSION ?= 0.1.1
+VERSION ?= 0.1.2
 PREFIX ?= $(HOME)/.local
 BIN := bin/ookami
 LDFLAGS := -X github.com/RakhaYandra/ookami/internal/cli.Version=$(VERSION)

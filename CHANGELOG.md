@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-11-17
+
+### Fixed
+
+- Services checks no longer misjudge client-only installs as a missing service: `PostgreSQLCheck`, `RedisCheck`, and `MySQLCheck` now declare `ClientBinaries` (`psql`, `pg_isready` / `redis-cli` / `mysql`, `mariadb`) alongside their server-side `Binaries`. A host with only a client (e.g. `psql` from `postgresql-libs`) now reports **info** (`client installed, server not installed`, no remediation) instead of **warning** (`installed, no systemd unit`), so a client-only host scores 100 instead of 99. No `schema_version` change; `results[]` keys unchanged.
+
+### Changed
+
+- `PostgreSQLCheck` server binaries are now `pg_ctl`, `postgres` (was `psql`, `pg_ctl`, `postgres`).
+
 ## [0.1.1] - 2026-11-15
 
 ### Added
