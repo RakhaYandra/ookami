@@ -120,6 +120,40 @@ func TestService_GarbledShowTreatedMissing(t *testing.T) {
 	}
 }
 
+func TestService_ClientOnlyInfo(t *testing.T) {
+	cases := []struct {
+		name    string
+		check   SystemdServiceCheck
+		client  string
+		message string
+	}{
+		{"postgres", PostgreSQLCheck(&runner.MockRunner{}, clientPathOnly), "psql", "client installed, server not installed"},
+		{"mysql", MySQLCheck(&runner.MockRunner{}, clientPathOnly), "mysql", "client installed, server not installed"},
+		{"redis", RedisCheck(&runner.MockRunner{}, clientPathOnly), "redis-cli", "client installed, server not installed"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rs := tc.check.Run(context.Background())
+			r := rs[0]
+			if r.Severity != model.SeverityInfo || r.Message != tc.message {
+				t.Fatalf("client-only %s: got %+v", tc.name, r)
+			}
+			if r.Remediation != nil {
+				t.Fatalf("client-only %s must not carry remediation: %+v", tc.name, r.Remediation)
+			}
+		})
+	}
+}
+
+func clientPathOnly(name string) (string, error) {
+	switch name {
+	case "psql", "pg_isready", "mysql", "mariadb", "redis-cli":
+		return "/usr/bin/" + name, nil
+	default:
+		return "", errors.New("not found")
+	}
+}
+
 func TestPostgreSQLConstructor(t *testing.T) {
 	m := &runner.MockRunner{Handlers: map[string]func([]string) ([]byte, error){
 		"systemctl": func([]string) ([]byte, error) {
@@ -130,7 +164,7 @@ func TestPostgreSQLConstructor(t *testing.T) {
 	if len(c.UnitNames) != 1 || c.UnitNames[0] != "postgresql.service" {
 		t.Fatalf("bad PG units: %q", c.UnitNames)
 	}
-	for _, b := range []string{"psql", "pg_ctl", "postgres"} {
+	for _, b := range []string{"pg_ctl", "postgres"} {
 		found := false
 		for _, x := range c.Binaries {
 			if x == b {
@@ -139,6 +173,17 @@ func TestPostgreSQLConstructor(t *testing.T) {
 		}
 		if !found {
 			t.Fatalf("PG missing bin %s: %q", b, c.Binaries)
+		}
+	}
+	for _, b := range []string{"psql", "pg_isready"} {
+		found := false
+		for _, x := range c.ClientBinaries {
+			if x == b {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("PG missing client bin %s: %q", b, c.ClientBinaries)
 		}
 	}
 	md := c.Metadata()
@@ -157,6 +202,9 @@ func TestRedisConstructor(t *testing.T) {
 	}
 	if len(c.Binaries) != 1 || c.Binaries[0] != "redis-server" {
 		t.Fatalf("bad redis bins: %q", c.Binaries)
+	}
+	if len(c.ClientBinaries) != 1 || c.ClientBinaries[0] != "redis-cli" {
+		t.Fatalf("bad redis client bins: %q", c.ClientBinaries)
 	}
 	md := c.Metadata()
 	if md.ID != "services-redis" || md.Category != model.CategoryServices || !md.Optional {
@@ -177,6 +225,9 @@ func TestMySQLConstructor(t *testing.T) {
 	}
 	if len(c.Binaries) != 2 || c.Binaries[0] != "mysqld" || c.Binaries[1] != "mariadbd" {
 		t.Fatalf("bad mysql bins: %q", c.Binaries)
+	}
+	if len(c.ClientBinaries) != 2 || c.ClientBinaries[0] != "mysql" || c.ClientBinaries[1] != "mariadb" {
+		t.Fatalf("bad mysql client bins: %q", c.ClientBinaries)
 	}
 	md := c.Metadata()
 	if md.ID != "services-mysql" || md.Name != "MySQL" {

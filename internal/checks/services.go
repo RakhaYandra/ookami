@@ -12,31 +12,33 @@ import (
 var _ model.Check = SystemdServiceCheck{}
 
 // SystemdServiceCheck reports systemd unit status with binary fallback.
+// Binaries are server-side; ClientBinaries only mark a client-only install.
 type SystemdServiceCheck struct {
-	Runner    runner.Runner
-	LookPath  func(string) (string, error)
-	Service   string
-	ID        string
-	UnitNames []string
-	Binaries  []string
+	Runner         runner.Runner
+	LookPath       func(string) (string, error)
+	Service        string
+	ID             string
+	UnitNames      []string
+	Binaries       []string
+	ClientBinaries []string
 }
 
 func PostgreSQLCheck(r runner.Runner, lp func(string) (string, error)) SystemdServiceCheck {
 	return SystemdServiceCheck{Runner: r, LookPath: lp, Service: "PostgreSQL",
 		ID: "services-postgresql", UnitNames: []string{"postgresql.service"},
-		Binaries: []string{"psql", "pg_ctl", "postgres"}}
+		Binaries: []string{"pg_ctl", "postgres"}, ClientBinaries: []string{"psql", "pg_isready"}}
 }
 
 func RedisCheck(r runner.Runner, lp func(string) (string, error)) SystemdServiceCheck {
 	return SystemdServiceCheck{Runner: r, LookPath: lp, Service: "Redis",
 		ID: "services-redis", UnitNames: []string{"redis.service", "redis-server.service"},
-		Binaries: []string{"redis-server"}}
+		Binaries: []string{"redis-server"}, ClientBinaries: []string{"redis-cli"}}
 }
 
 func MySQLCheck(r runner.Runner, lp func(string) (string, error)) SystemdServiceCheck {
 	return SystemdServiceCheck{Runner: r, LookPath: lp, Service: "MySQL",
 		ID: "services-mysql", UnitNames: []string{"mysqld.service", "mariadb.service", "mysql.service"},
-		Binaries: []string{"mysqld", "mariadbd"}}
+		Binaries: []string{"mysqld", "mariadbd"}, ClientBinaries: []string{"mysql", "mariadb"}}
 }
 
 func (c SystemdServiceCheck) Metadata() model.CheckMetadata {
@@ -74,16 +76,29 @@ func (c SystemdServiceCheck) findLoadedUnit(ctx context.Context) (string, bool) 
 }
 
 func (c SystemdServiceCheck) anyBinary() bool {
-	lp := c.LookPath
-	if lp == nil {
-		lp = exec.LookPath
-	}
 	for _, b := range c.Binaries {
-		if _, err := lp(b); err == nil {
+		if _, err := c.lookup(b); err == nil {
 			return true
 		}
 	}
 	return false
+}
+
+func (c SystemdServiceCheck) anyClientBinary() bool {
+	for _, b := range c.ClientBinaries {
+		if _, err := c.lookup(b); err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (c SystemdServiceCheck) lookup(b string) (string, error) {
+	lp := c.LookPath
+	if lp == nil {
+		lp = exec.LookPath
+	}
+	return lp(b)
 }
 
 func (c SystemdServiceCheck) Run(ctx context.Context) []Result {
@@ -108,6 +123,11 @@ func (c SystemdServiceCheck) Run(ctx context.Context) []Result {
 	if c.anyBinary() {
 		base.Severity = model.SeverityWarning
 		base.Message = "installed, no systemd unit"
+		return model.Single(base)
+	}
+	if c.anyClientBinary() {
+		base.Severity = model.SeverityInfo
+		base.Message = "client installed, server not installed"
 		return model.Single(base)
 	}
 	base.Severity = model.SeverityInfo
