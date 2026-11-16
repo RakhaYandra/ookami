@@ -2,7 +2,7 @@
 
 Is your Linux machine ready for development? Ookami inspects your setup and reports what is healthy, what needs attention, and what is missing.
 
-> Status (v0.1.1): Released. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, opt-in `--fix` for safe service restarts, and shell completion.
+> Status (v0.1.2): Released. `doctor` is functional for system/development/storage/services/network/gpu (18 checks) with weighted scoring, remediation hints, verbose details, stable `--json` for automation, opt-in `--fix` for safe service restarts, and shell completion.
 
 ## Example
 
@@ -40,22 +40,22 @@ GPU
   ✓ AMD Phoenix1 amdgpu
   ℹ CUDA not installed
 Services
-  ⚠ PostgreSQL installed, no systemd unit
+  ℹ PostgreSQL client installed, server not installed
   ℹ Redis not installed
   ℹ MySQL not installed
 ----------------------------------------
-Score: 99/100
-1 warning, 0 critical issues
-Development environment needs attention.
+Score: 100/100
+0 warnings, 0 critical issues
+Development environment is healthy.
 ```
 
-(Real output, 2026-10-09, exit 1. Values are machine-specific and will differ on your host.)
+(Example output, 2026-11-17 with v0.1.2 on a client-only host, exit 0; before v0.1.2 the `psql`-only PostgreSQL install produced a warning and Score 99/100. Values are machine-specific and will differ on your host.)
 
 Remediation lines (`    → Suggested action: <command> (<description>[, requires sudo])`) print under warning/critical/unknown results that carry remediation data. This host shows none: the PostgreSQL no-unit path carries no remediation (only a stopped unit does). `--verbose` adds sorted `key=value` detail lines per result (e.g. `latency_ms`, `driver`).
 
 ## How scoring works
 
-Weighted per-category score (0–100): system 20, development 30, storage 15, network 15, services 10, gpu 10. Each category starts at 100 with penalti 25/5/2 per critical/warning/unknown result (pass/info no effect, floor 0); global score is the weight-averaged sum over active categories only (renormalisasi kategori absen). GPU eksklusi bila tak ada hardware (`gpu-none` info-only excluded; single-category `check` renormalizes to its own weight). Live example above: 5 categories at 100 + services at 95 → (90×100+95×10)/100=99, status `warning`.
+Weighted per-category score (0–100): system 20, development 30, storage 15, network 15, services 10, gpu 10. Each category starts at 100 with penalti 25/5/2 per critical/warning/unknown result (pass/info no effect, floor 0); global score is the weight-averaged sum over active categories only (renormalisasi kategori absen). GPU eksklusi bila tak ada hardware (`gpu-none` info-only excluded; single-category `check` renormalizes to its own weight). Live example above: all categories at 100 → score 100, status `healthy` (a client-only PostgreSQL no longer subtracts 5 from services).
 
 JSON output (`--json`) includes ordered `categories` breakdown:
 
@@ -135,7 +135,7 @@ make build        # produces ./bin/ookami
 
 ```sh
 ookami doctor --quiet; echo $?
-# ⚠ PostgreSQL installed, no systemd unit → exit 1 (live host, 2026-10-09)
+# (no findings on a healthy host → no output, exit 0)
 ```
 
 ## Auto-fix
@@ -155,12 +155,12 @@ Live host has no fixable item (PostgreSQL no-unit path carries nil remediation),
 ```sh
 echo n | ookami doctor --fix
 # info: no fixable items. (stderr)
-# Score: 99/100, 1 warning, 0 critical issues, exit 1 — rendered twice (before + after re-run)
+# Score: 100/100, 0 warnings, 0 critical issues, exit 0 — rendered twice (before + after re-run)
 ```
 
 ## Roadmap
 
-Planned checks and automation are tracked internally; this README documents what v0.1.1 does (Phase 8 complete, released; `--json` carries `schema_version: 1`).
+Planned checks and automation are tracked internally; this README documents what v0.1.2 does (Phase 8 complete, released; `--json` carries `schema_version: 1`).
 
 ## Contributing
 
